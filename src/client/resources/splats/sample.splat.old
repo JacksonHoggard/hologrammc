@@ -1,0 +1,4 @@
+# x, y, z,    R,   G,   B,   A,   size
+ 0.0 0.0 0.0  1.0  0.0  0.0  1.0  0.15   # Red point at origin
+ 0.2 0.3 0.1  0.0  1.0  0.0  0.8  0.15   # Green point slightly offset
+-0.2 0.3 0.1  0.0  0.0  1.0  0.8  0.15   # Blue point slightly offset

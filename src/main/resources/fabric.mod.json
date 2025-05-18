@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "splatframes",
+  "version": "${version}",
+  "name": "SplatFrames",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/splatframes/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "me.jacksonhoggard.splatframes.client.SplatframesDataGenerator"
+    ],
+    "client": [
+      "me.jacksonhoggard.splatframes.client.SplatframesClient"
+    ],
+    "main": [
+      "me.jacksonhoggard.splatframes.Splatframes"
+    ]
+  },
+  "mixins": [
+    "splatframes.mixins.json",
+    {
+      "config": "splatframes.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.jacksonhoggard.splatframes.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ItemFrameEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
