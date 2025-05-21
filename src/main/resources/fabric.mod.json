@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "splatframes",
+  "id": "holoframes",
   "version": "${version}",
-  "name": "SplatFrames",
+  "name": "HoloFrames",
   "description": "",
   "authors": [],
   "contact": {},
   "license": "All-Rights-Reserved",
-  "icon": "assets/splatframes/icon.png",
+  "icon": "assets/holoframes/icon.png",
   "environment": "*",
   "entrypoints": {
     "fabric-datagen": [
-      "me.jacksonhoggard.splatframes.client.SplatframesDataGenerator"
+      "me.jacksonhoggard.holoframes.client.HoloframesDataGenerator"
     ],
     "client": [
-      "me.jacksonhoggard.splatframes.client.SplatframesClient"
+      "me.jacksonhoggard.holoframes.client.HoloframesClient"
     ],
     "main": [
-      "me.jacksonhoggard.splatframes.Splatframes"
+      "me.jacksonhoggard.holoframes.Holoframes"
     ]
   },
   "mixins": [
-    "splatframes.mixins.json",
+    "holoframes.mixins.json",
     {
-      "config": "splatframes.client.mixins.json",
+      "config": "holoframes.client.mixins.json",
       "environment": "client"
     }
   ],

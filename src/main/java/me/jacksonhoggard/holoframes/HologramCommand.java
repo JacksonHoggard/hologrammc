@@ -1,18 +1,13 @@
-package me.jacksonhoggard.splatframes;
+package me.jacksonhoggard.holoframes;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.decoration.ItemFrameEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
@@ -21,13 +16,13 @@ import java.util.Optional;
 public class HologramCommand {
     public static final IdentifierArgumentType FILE_ARGUMENT = IdentifierArgumentType.identifier();
 
-    public static int executeSetSplat(CommandContext<ServerCommandSource> context) {
+    public static int executeSetHologram(CommandContext<ServerCommandSource> context) {
         ServerPlayerEntity player = context.getSource().getPlayer();
         String fileName = IdentifierArgumentType.getIdentifier(context, "file").getPath();
 
-        EntityHitResult frame = getPlayerPOVHitResult(player, 5.0D);
+        EntityHitResult frame = getPlayerPOVHitResult(player, 25.0D);
         if(frame != null && frame.getEntity().getType().equals(EntityType.ITEM_FRAME)) {
-            ((ItemFrameEntityMixinAccess) (Object) frame.getEntity()).splatFrames$setSplatFile(fileName);
+            ((ItemFrameEntityMixinAccess) (Object) frame.getEntity()).holoFrames$setModelFile(fileName);
             context.getSource().sendFeedback(() -> Text.literal("Assigned hologram file: " + fileName), true);
         } else {
             context.getSource().sendError(Text.literal("You must be looking at an item frame!"));
@@ -49,7 +44,7 @@ public class HologramCommand {
         Box startEndBox = new Box(startPos, endPos);
         Entity entity = null;
         for(Entity entity1 : player.getWorld().getOtherEntities(player, startEndBox, (val) -> true)) {
-            Box box = entity1.getBoundingBox().expand(1.0D);
+            Box box = entity1.getBoundingBox().expand(0.2D);
             Optional<Vec3d> optional = box.raycast(startPos, endPos);
             if(box.contains(startPos)) {
                 if(distance >= 0.0D) {

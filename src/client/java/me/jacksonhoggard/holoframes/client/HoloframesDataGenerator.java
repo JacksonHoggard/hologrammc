@@ -1,9 +1,9 @@
-package me.jacksonhoggard.splatframes.client;
+package me.jacksonhoggard.holoframes.client;
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
-public class SplatframesDataGenerator implements DataGeneratorEntrypoint {
+public class HoloframesDataGenerator implements DataGeneratorEntrypoint {
 
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {

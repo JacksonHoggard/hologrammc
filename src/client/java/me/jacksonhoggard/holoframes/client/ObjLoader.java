@@ -1,4 +1,4 @@
-package me.jacksonhoggard.splatframes.client;
+package me.jacksonhoggard.holoframes.client;
 
 import java.nio.file.*;
 import java.io.*;
@@ -26,7 +26,7 @@ public class ObjLoader {
                 float x = Float.parseFloat(tokens[1]);
                 float y = Float.parseFloat(tokens[2]);
                 float z = Float.parseFloat(tokens[3]);
-                model.vertices.add(new float[] { x, y, z });
+                model.vertices.add(new float[]{x, y, z});
             } else if (tokens[0].equals("f")) {
                 // Parse face indices
                 int[] indices = new int[tokens.length - 1];
@@ -35,7 +35,14 @@ public class ObjLoader {
                     // OBJ files index starting at 1
                     indices[i] = Integer.parseInt(parts[0]) - 1;
                 }
-                model.faces.add(indices);
+                // Triangulate face if it has more than 3 vertices
+                if (indices.length > 3) {
+                    for (int i = 1; i < indices.length - 1; i++) {
+                        model.faces.add(new int[]{indices[0], indices[i], indices[i + 1]});
+                    }
+                } else {
+                    model.faces.add(indices);
+                }
             }
         }
         return model;
