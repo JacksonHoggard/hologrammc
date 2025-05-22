@@ -67,6 +67,7 @@ public class HoloFrameRenderer {
         BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
         matrices.push();
         orientToFrame(frameEntityRenderState, matrices);
+        rotateHologram(frameEntityRenderState, matrices);
         totalTickDelta += MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
         float rotation = (totalTickDelta / 50.0f % 360);
         matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation));
@@ -140,5 +141,22 @@ public class HoloFrameRenderer {
 
         matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(f));
         matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(g));
+    }
+
+    private static void rotateHologram(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {
+        switch (((ItemFrameEntityRenderStateAccessor) (itemFrameEntityRenderState)).holoFrames$getHologramRotation()) {
+            case 0:
+                return;
+            case 1:
+                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
+            case 2:
+                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+            case 3:
+                matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(270.0F));
+            case 4:
+                matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0F));
+            case 5:
+                matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+        }
     }
 }

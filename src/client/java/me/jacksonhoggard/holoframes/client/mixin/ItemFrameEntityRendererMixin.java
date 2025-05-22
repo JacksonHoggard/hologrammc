@@ -29,10 +29,13 @@ public class ItemFrameEntityRendererMixin<T extends ItemFrameEntity> {
             at = @At("TAIL"))
     private void onUpdateRenderState(T itemFrameEntity, ItemFrameEntityRenderState itemFrameEntityRenderState, float f, CallbackInfo ci) {
         String holoFile = ((ItemFrameEntityMixinAccess) itemFrameEntity).holoFrames$getModelFile();
+        int hologramRotation = ((ItemFrameEntityMixinAccess) itemFrameEntity).holoFrames$getHologramRotation();
         if (holoFile != null && !holoFile.isEmpty()) {
             ((ItemFrameEntityRenderStateAccessor) itemFrameEntityRenderState).holoFrames$setModelFile(holoFile);
+            ((ItemFrameEntityRenderStateAccessor) itemFrameEntityRenderState).holoFrames$setHologramRotation(hologramRotation);
         } else {
             ((ItemFrameEntityRenderStateAccessor) itemFrameEntityRenderState).holoFrames$setModelFile("");
+            ((ItemFrameEntityRenderStateAccessor) itemFrameEntityRenderState).holoFrames$setHologramRotation(0);
         }
     }
 }

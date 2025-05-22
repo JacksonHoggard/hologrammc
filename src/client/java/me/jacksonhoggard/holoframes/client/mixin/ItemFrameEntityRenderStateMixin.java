@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ItemFrameEntityRenderStateMixin extends EntityRenderState implements ItemFrameEntityRenderStateAccessor {
     @Unique
     private String hologramFile = null;
+    @Unique
+    private int hologramRotation = 0;
 
     @Override
     public String holoFrames$getModelFile() {
@@ -24,9 +26,20 @@ public class ItemFrameEntityRenderStateMixin extends EntityRenderState implement
         this.hologramFile = file;
     }
 
+    @Override
+    public int holoFrames$getHologramRotation() {
+        return hologramRotation;
+    }
+
+    @Override
+    public void holoFrames$setHologramRotation(int rotation) {
+        this.hologramRotation = rotation;
+    }
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
         this.hologramFile = "";
+        this.hologramRotation = 0;
     }
 
 }

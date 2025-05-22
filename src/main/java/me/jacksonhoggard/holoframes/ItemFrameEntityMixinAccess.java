@@ -6,4 +6,8 @@ public interface ItemFrameEntityMixinAccess {
 
     void holoFrames$setModelFile(String fileName);
 
+    int holoFrames$getHologramRotation();
+
+    void holoFrames$setHologramRotation(int rotation);
+
 }
