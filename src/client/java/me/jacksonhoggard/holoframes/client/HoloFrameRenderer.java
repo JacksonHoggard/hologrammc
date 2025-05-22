@@ -146,7 +146,6 @@ public class HoloFrameRenderer {
 
     private static void rotateHologram(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {
         int rotation = ((ItemFrameEntityRenderStateAccessor) (itemFrameEntityRenderState)).holoFrames$getHologramRotation();
-        Logger.getLogger("HoloFrames").info("Hologram rotation: " + rotation);
         switch (rotation) {
             case 0:
                 break;
