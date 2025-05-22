@@ -34,7 +34,7 @@ public abstract class ItemFrameEntityMixin implements ItemFrameEntityMixinAccess
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void onWriteCustomDataToNbt(NbtCompound nbt, CallbackInfo ci) {
         nbt.putString("HoloFile", holoFrames$getModelFile());
-        nbt.putByte("HologramRotation", (byte) holoFrames$getHologramRotation());
+        nbt.putInt("HologramRotation", holoFrames$getHologramRotation());
     }
 
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
@@ -43,17 +43,15 @@ public abstract class ItemFrameEntityMixin implements ItemFrameEntityMixinAccess
             this.holoFrames$setModelFile(nbt.getString("HoloFile", ""));
         }
         if (nbt.contains("HologramRotation")) {
-            this.holoFrames$setHologramRotation(nbt.getByte("HologramRotation", (byte) 0));
+            this.holoFrames$setHologramRotation(nbt.getInt("HologramRotation", 0));
         }
     }
 
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     private void onInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         if(!this.holoFrames$getModelFile().isEmpty()) {
-            if(!player.getWorld().isClient) {
-                this.holoFrames$setHologramRotation(this.holoFrames$getHologramRotation() + 1);
-            }
-            cir.setReturnValue(ActionResult.PASS);
+            this.holoFrames$setHologramRotation(this.holoFrames$getHologramRotation() + 1);
+            cir.setReturnValue(ActionResult.SUCCESS);
             cir.cancel();
         }
     }

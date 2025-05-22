@@ -17,6 +17,7 @@ import org.joml.Matrix4f;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Logger;
 
 @Environment(value = EnvType.CLIENT)
 public class HoloFrameRenderer {
@@ -144,19 +145,26 @@ public class HoloFrameRenderer {
     }
 
     private static void rotateHologram(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {
-        switch (((ItemFrameEntityRenderStateAccessor) (itemFrameEntityRenderState)).holoFrames$getHologramRotation()) {
+        int rotation = ((ItemFrameEntityRenderStateAccessor) (itemFrameEntityRenderState)).holoFrames$getHologramRotation();
+        Logger.getLogger("HoloFrames").info("Hologram rotation: " + rotation);
+        switch (rotation) {
             case 0:
-                return;
+                break;
             case 1:
                 matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F));
+                break;
             case 2:
                 matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+                break;
             case 3:
-                matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(270.0F));
+                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(270.0F));
+                break;
             case 4:
                 matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0F));
+                break;
             case 5:
-                matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+                matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(270.0F));
+                break;
         }
     }
 }
