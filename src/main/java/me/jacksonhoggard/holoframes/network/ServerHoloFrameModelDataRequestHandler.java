@@ -21,8 +21,6 @@ public class ServerHoloFrameModelDataRequestHandler {
         if (model != null) {
             HoloFrameModelDataSyncPacket.HoloFrameModelDataPayload payload = new HoloFrameModelDataSyncPacket(model.vertices(), hologramFile).toPayload();
             ServerPlayNetworking.send(player, payload);
-        } else {
-            Log.error(LogCategory.KNOT, "Failed to find hologram model for file: " + hologramFile);
         }
     }
 }
