@@ -2,9 +2,13 @@ package me.jacksonhoggard.holoframes.client;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import me.jacksonhoggard.holoframes.ObjLoader;
+import me.jacksonhoggard.holoframes.network.HoloFrameModelDataRequestPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
@@ -17,7 +21,6 @@ import org.joml.Matrix4f;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Logger;
 
 @Environment(value = EnvType.CLIENT)
 public class HoloFrameRenderer {
@@ -39,7 +42,6 @@ public class HoloFrameRenderer {
 
     private static float totalTickDelta = 0;
 
-    // Cache of loaded hologram models: filename -> GPU buffer model
     private static final Map<String, HologramModel> LOADED_MODELS = new HashMap<>();
 
     private static class HologramModel {
@@ -50,17 +52,16 @@ public class HoloFrameRenderer {
         }
     }
 
-    /**
-     * Main render function called by the ItemFrameRenderer mixin.
-     */
+    public static void addHologramModel(float[] points, String holoFile) {
+        HologramModel model = new HologramModel(points);
+        LOADED_MODELS.put(holoFile, model);
+    }
+
     public static void renderHologram(ItemFrameEntityRenderState frameEntityRenderState, String holoFile, MatrixStack matrices) {
         HologramModel model = LOADED_MODELS.get(holoFile);
         if (model == null) {
-            model = loadHologramModel(holoFile);
-            if (model == null) {
-                return;  // loading failed
-            }
-            LOADED_MODELS.put(holoFile, model);
+            ClientPlayNetworking.send(new HoloFrameModelDataRequestPacket.HoloFrameModelDataRequestPayload(holoFile));
+            return;
         }
 
         Tessellator tessellator = Tessellator.getInstance();
@@ -98,31 +99,8 @@ public class HoloFrameRenderer {
         renderLayer.draw(builtBuffer);
     }
 
-    /** Load the file data from disk and upload to a GPU buffer. */
-    private static HologramModel loadHologramModel(String fileName) {
-        Path path = Path.of("config/holoframes/" + fileName);
-        if (!Files.exists(path)) {
-            // Try loading from mod resources (e.g., `resources/models/` for a built-in sample)
-            try {
-                path = Path.of(HoloFrameRenderer.class.getResource("/models/" + fileName).toURI());
-            } catch (Exception e) {
-                return null; // Failed to load model
-            }
-        }
-        try {
-            ObjLoader.ObjModel model = ObjLoader.load(path.toString());
-            float[] points = ObjLoader.getVerticesInFaceOrder(model);
-
-            return new HologramModel(points);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /** Apply transformations to orient the hologram model within the item frame. */
     private static void orientToFrame(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {
         Direction direction = itemFrameEntityRenderState.facing;
-        //matrixStack.translate((double)direction.getOffsetX() * 0.46875, (double)direction.getOffsetY() * 0.46875, (double)direction.getOffsetZ() * 0.46875);
         matrixStack.scale(0.5F, 0.5F, 0.5F);
         matrixStack.translate(0.0F, 0.25F, 0.0F);
         float f = 0.0F;
