@@ -4,18 +4,28 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import me.jacksonhoggard.holoframes.Holoframes;
 import me.jacksonhoggard.holoframes.ObjLoader;
 import me.jacksonhoggard.holoframes.network.HoloFrameModelDataRequestPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.render.entity.state.ItemFrameEntityRenderState;
+import net.minecraft.client.render.model.BlockModelPart;
+import net.minecraft.client.render.model.BlockStateManagers;
+import net.minecraft.client.render.model.BlockStateModel;
+import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import org.joml.Matrix4f;
 
 import java.nio.file.Files;
@@ -26,18 +36,22 @@ import java.util.*;
 public class HoloFrameRenderer {
     public static final RenderPipeline TRIANGLES = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-                    .withLocation("pipeline/triangles")
+                    .withLocation(Identifier.of(Holoframes.MOD_ID, "pipeline/triangles"))
                     .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
                     .withCull(true)
                     .withBlend(BlendFunction.TRANSLUCENT)
+                    .withDepthWrite(true)
+                    .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
                     .build()
     );
 
     private static final RenderLayer renderLayer = RenderLayer.of(
             "triangles",
             1536,
+            false,
+            true,
             TRIANGLES,
-            RenderLayer.MultiPhaseParameters.builder().lineWidth(new RenderPhase.LineWidth(OptionalDouble.of(1))).build(false)
+            RenderLayer.MultiPhaseParameters.builder().build(false)
     );
 
     private static float totalTickDelta = 0;
@@ -55,6 +69,10 @@ public class HoloFrameRenderer {
     public static void addHologramModel(float[] points, String holoFile) {
         HologramModel model = new HologramModel(points);
         LOADED_MODELS.put(holoFile, model);
+    }
+
+    public static void renderFrame(MatrixStack matrices) {
+
     }
 
     public static void renderHologram(ItemFrameEntityRenderState frameEntityRenderState, String holoFile, MatrixStack matrices) {
