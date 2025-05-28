@@ -1,13 +1,14 @@
 package me.jacksonhoggard.holoframes;
 
-import me.jacksonhoggard.holoframes.network.HoloFrameModelDataSyncPacket;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.util.log.Log;
 import net.fabricmc.loader.impl.util.log.LogCategory;
-import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.nio.file.Path;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +25,22 @@ public class HologramModelRegistry {
                         .filter(path -> path.getFileName().toString().endsWith(".obj"))
                         .forEach(path -> {
                             try {
-                                float[] vertices = loadOBJModel(path);
-                                models.put(path.getFileName().toString(), new HologramModel(vertices));
+                                ObjLoader.ObjModel model = ObjLoader.load(path.toString());
+                                float[] vertices = model.getVerticesInFaceOrder();
+                                float[] texCoords = model.getTexCoordsInFaceOrder();
+                                byte[] texture = convertImageToByteArray(
+                                        FabricLoader.getInstance().getConfigDir()
+                                                .resolve("holoframes")
+                                                .resolve("models")
+                                                .resolve("textures")
+                                                .resolve(path.getFileName().toString().replace(".obj", ".png"))
+                                                .toString()
+                                );
+                                if(texture == null) {
+                                    Log.warn(LogCategory.KNOT, "Texture for model " + path.getFileName() + " not found.");
+                                    texture = new byte[0];
+                                }
+                                models.put(path.getFileName().toString(), new HologramModel(vertices, texCoords, texture));
                             } catch (Exception e) {
                                 Log.error(LogCategory.KNOT, "Failed to load hologram model from " + path, e);
                             }
@@ -36,11 +51,20 @@ public class HologramModelRegistry {
         }
     }
 
-    private static float[] loadOBJModel(java.nio.file.Path path) throws Exception {
-        ObjLoader.ObjModel model = ObjLoader.load(path.toString());
-        return ObjLoader.getVerticesInFaceOrder(model);
+    public record HologramModel(float[] vertices, float[] texCoords, byte[] texture) {
     }
 
-    public record HologramModel(float[] vertices) {
+    public static byte[] convertImageToByteArray(String imagePath) {
+        try {
+            File imageFile = new File(imagePath);
+            BufferedImage bufferedImage = ImageIO.read(imageFile);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            String fileExtension = imagePath.substring(imagePath.lastIndexOf(".") + 1);
+            ImageIO.write(bufferedImage, fileExtension, outputStream);
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            Log.error(LogCategory.KNOT, "Failed to convert image to byte array", e);
+            return null;
+        }
     }
 }

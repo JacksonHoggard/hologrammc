@@ -3,41 +3,37 @@ package me.jacksonhoggard.holoframes.client;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.AddressMode;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.TextureFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import me.jacksonhoggard.holoframes.Holoframes;
-import me.jacksonhoggard.holoframes.ObjLoader;
 import me.jacksonhoggard.holoframes.network.HoloFrameModelDataRequestPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.render.entity.state.ItemFrameEntityRenderState;
-import net.minecraft.client.render.model.BlockModelPart;
-import net.minecraft.client.render.model.BlockStateManagers;
-import net.minecraft.client.render.model.BlockStateModel;
-import net.minecraft.client.texture.SpriteAtlasTexture;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
 import org.joml.Matrix4f;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 @Environment(value = EnvType.CLIENT)
 public class HoloFrameRenderer {
-    public static final RenderPipeline TRIANGLES = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-                    .withLocation(Identifier.of(Holoframes.MOD_ID, "pipeline/triangles"))
-                    .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
+
+    private static final RenderPipeline HOLOGRAM_PIPELINE = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.POSITION_TEX_COLOR_SNIPPET)
+                    .withLocation(Identifier.of(Holoframes.MOD_ID, "pipeline/hologram"))
+                    .withVertexFormat(VertexFormats.POSITION_TEXTURE_COLOR, VertexFormat.DrawMode.TRIANGLES)
+                    .withSampler("Sampler0")
                     .withCull(true)
                     .withBlend(BlendFunction.TRANSLUCENT)
                     .withDepthWrite(true)
@@ -45,14 +41,14 @@ public class HoloFrameRenderer {
                     .build()
     );
 
-    private static final RenderLayer renderLayer = RenderLayer.of(
-            "triangles",
-            1536,
-            false,
-            true,
-            TRIANGLES,
-            RenderLayer.MultiPhaseParameters.builder().build(false)
-    );
+    private static final RenderLayer HOLOGRAM_LAYER =
+                RenderLayer.of(
+                        "hologram",
+                        1536,
+                        HOLOGRAM_PIPELINE,
+                        RenderLayer.MultiPhaseParameters.builder()
+                                .build(false)
+                );
 
     private static float totalTickDelta = 0;
 
@@ -60,19 +56,63 @@ public class HoloFrameRenderer {
 
     private static class HologramModel {
         float[] points;
+        float[] texCoords;
+        HologramTexture texture;
 
         HologramModel(float[] points) {
             this.points = points;
         }
     }
 
-    public static void addHologramModel(float[] points, String holoFile) {
-        HologramModel model = new HologramModel(points);
-        LOADED_MODELS.put(holoFile, model);
+    private static class HologramTexture {
+        final GpuTexture texture;
+        final NativeImage image;
+
+        public HologramTexture(String label, byte[] textureData) {
+            try {
+                image = NativeImage.read(textureData);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load hologram texture", e);
+            }
+            this.texture = RenderSystem.getDevice().createTexture(
+                    label,
+                    TextureFormat.RGBA8,
+                    image.getWidth(),
+                    image.getHeight(),
+                    1
+            );
+            this.texture.setAddressMode(
+                    AddressMode.CLAMP_TO_EDGE,
+                    AddressMode.CLAMP_TO_EDGE
+            );
+            this.texture.setTextureFilter(
+                    FilterMode.LINEAR,
+                    FilterMode.NEAREST,
+                    false
+            );
+
+            RenderSystem.getDevice().createCommandEncoder().writeToTexture(
+                    this.texture,
+                    image,
+                    0,
+                    0,
+                    0,
+                    image.getWidth(),
+                    image.getHeight(),
+                    0,
+                    0
+            );
+        }
     }
 
-    public static void renderFrame(MatrixStack matrices) {
 
+    public static void addHologramModel(float[] points, float[] texCoords, String holoFile, byte[] texture) {
+        if(LOADED_MODELS.containsKey(holoFile))
+            return;
+        HologramModel model = new HologramModel(points);
+        model.texture = texture != null && texture.length != 0 ? new HologramTexture(holoFile, texture) : null;
+        model.texCoords = texCoords;
+        LOADED_MODELS.put(holoFile, model);
     }
 
     public static void renderHologram(ItemFrameEntityRenderState frameEntityRenderState, String holoFile, MatrixStack matrices) {
@@ -84,7 +124,7 @@ public class HoloFrameRenderer {
 
         Tessellator tessellator = Tessellator.getInstance();
 
-        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
         matrices.push();
         orientToFrame(frameEntityRenderState, matrices);
         rotateHologram(frameEntityRenderState, matrices);
@@ -101,20 +141,24 @@ public class HoloFrameRenderer {
         }
         float range = maxCoord - minCoord;
 
-        for (int i = 0; i < model.points.length; i += 3) {
+        for (int i = 0, j = 0; i < model.points.length; i += 3, j += 2) {
             float x = (model.points[i] - minCoord) / (range != 0 ? range : 1);
             float y = (model.points[i + 1] - minCoord) / (range != 0 ? range : 1);
             float z = (model.points[i + 2] - minCoord) / (range != 0 ? range : 1);
             float xNormalized = (x - 0.5f);
             float yNormalized = (y - 0.5f);
             float zNormalized = (z - 0.5f);
-            buffer.vertex(modifiedMatrix, xNormalized, yNormalized, zNormalized).color(1.0f, 1.0f, 1.0f, 0.5f);
+            buffer.vertex(modifiedMatrix, xNormalized, yNormalized, zNormalized)
+                    .texture(model.texCoords[j], 1.0F - model.texCoords[j + 1])
+                    .color(1.0F, 1.0F, 1.0F, 0.5F);
         }
 
         matrices.pop();
 
         BuiltBuffer builtBuffer = buffer.end();
-        renderLayer.draw(builtBuffer);
+
+        RenderSystem.setShaderTexture(0, model.texture != null ? model.texture.texture : null);
+        HOLOGRAM_LAYER.draw(builtBuffer);
     }
 
     private static void orientToFrame(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {

@@ -3,6 +3,7 @@ package me.jacksonhoggard.holoframes.client.network;
 import me.jacksonhoggard.holoframes.client.HoloFrameRenderer;
 import me.jacksonhoggard.holoframes.network.HoloFrameModelDataSyncPacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.ByteBuffer;
 
@@ -11,8 +12,10 @@ public class ClientHoloFrameModelDataSyncReceiver {
         ClientPlayNetworking.registerGlobalReceiver(HoloFrameModelDataSyncPacket.HoloFrameModelDataPayload.ID, (payload, context) -> {
             context.client().execute(() -> {
                 byte[] vertices = payload.vertices();
+                byte[] texCoords = payload.texCoords();
+                byte[] texture = payload.texture();
                 String hologramFile = payload.hologramFile();
-                HoloFrameRenderer.addHologramModel(byteArrayToFloat(vertices), hologramFile);
+                HoloFrameRenderer.addHologramModel(byteArrayToFloat(vertices), byteArrayToFloat(texCoords), hologramFile, texture);
             });
         });
     }

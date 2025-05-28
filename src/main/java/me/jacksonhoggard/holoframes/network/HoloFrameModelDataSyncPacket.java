@@ -14,10 +14,14 @@ public class HoloFrameModelDataSyncPacket {
     public static final Identifier ID = Identifier.of(Holoframes.MOD_ID, "model_data_sync");
 
     public final byte[] vertices;
+    public final byte[] texCoords;
+    public final byte[] texture;
     public final String hologramFile;
 
-    public HoloFrameModelDataSyncPacket(float[] vertices, String hologramFile) {
+    public HoloFrameModelDataSyncPacket(float[] vertices, float[] texCoords, byte[] texture, String hologramFile) {
         this.vertices = floatToByteArray(vertices);
+        this.texCoords = floatToByteArray(texCoords);
+        this.texture = texture;
         this.hologramFile = hologramFile;
     }
 
@@ -25,10 +29,12 @@ public class HoloFrameModelDataSyncPacket {
         PayloadTypeRegistry.playS2C().register(HoloFrameModelDataPayload.ID, HoloFrameModelDataPayload.CODEC);
     }
 
-    public record HoloFrameModelDataPayload(byte[] vertices, String hologramFile) implements CustomPayload {
+    public record HoloFrameModelDataPayload(byte[] vertices, byte[] texCoords, byte[] texture, String hologramFile) implements CustomPayload {
         public static final CustomPayload.Id<HoloFrameModelDataPayload> ID = new CustomPayload.Id<>(HoloFrameModelDataSyncPacket.ID);
         public static final PacketCodec<RegistryByteBuf, HoloFrameModelDataPayload> CODEC = PacketCodec.tuple(
                 PacketCodecs.BYTE_ARRAY, HoloFrameModelDataPayload::vertices,
+                PacketCodecs.BYTE_ARRAY, HoloFrameModelDataPayload::texCoords,
+                PacketCodecs.BYTE_ARRAY, HoloFrameModelDataPayload::texture,
                 PacketCodecs.STRING, HoloFrameModelDataPayload::hologramFile,
                 HoloFrameModelDataPayload::new
         );
@@ -40,7 +46,7 @@ public class HoloFrameModelDataSyncPacket {
     }
 
     public HoloFrameModelDataPayload toPayload() {
-        return new HoloFrameModelDataPayload(this.vertices, this.hologramFile);
+        return new HoloFrameModelDataPayload(this.vertices, this.texCoords, this.texture, this.hologramFile);
     }
 
     private static byte[] floatToByteArray(float[] input) {
