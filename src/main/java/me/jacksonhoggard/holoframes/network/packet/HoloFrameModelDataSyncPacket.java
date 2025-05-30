@@ -1,4 +1,4 @@
-package me.jacksonhoggard.holoframes.network;
+package me.jacksonhoggard.holoframes.network.packet;
 
 import me.jacksonhoggard.holoframes.Holoframes;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -7,10 +7,11 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
-public class HoloFrameModelDataSyncPacket {
+public class HoloFrameModelDataSyncPacket implements IPacket<HoloFrameModelDataSyncPacket.HoloFrameModelDataPayload> {
     public static final Identifier ID = Identifier.of(Holoframes.MOD_ID, "model_data_sync");
 
     public final byte[] vertices;
@@ -45,7 +46,7 @@ public class HoloFrameModelDataSyncPacket {
         }
     }
 
-    public HoloFrameModelDataPayload toPayload() {
+    public @NotNull HoloFrameModelDataPayload toPayload() {
         return new HoloFrameModelDataPayload(this.vertices, this.texCoords, this.texture, this.hologramFile);
     }
 

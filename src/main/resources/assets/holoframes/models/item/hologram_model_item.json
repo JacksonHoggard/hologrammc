@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "holoframes:item/hologram_model_item"
+  }
+}

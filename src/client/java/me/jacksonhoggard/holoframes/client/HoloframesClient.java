@@ -1,12 +1,38 @@
 package me.jacksonhoggard.holoframes.client;
 
 import me.jacksonhoggard.holoframes.client.network.ClientHoloFrameModelDataSyncReceiver;
+import me.jacksonhoggard.holoframes.item.HoloframesItems;
+import me.jacksonhoggard.holoframes.screen.HologramScreen;
+import me.jacksonhoggard.holoframes.screen.HologramScreenHandler;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.text.Text;
 
 public class HoloframesClient implements ClientModInitializer {
 
+    private static String hologramFile;
+
     @Override
     public void onInitializeClient() {
+        hologramFile = "";
+
         ClientHoloFrameModelDataSyncReceiver.register();
+
+        ItemTooltipCallback.EVENT.register(((itemStack, tooltipContext, tooltipType, list) -> {
+            if(!itemStack.isOf(HoloframesItems.HOLOGRAM_MODEL_ITEM))
+                return;
+            list.add(Text.translatable("item.holoframes.hologram_model_item.tooltip").withColor(0x90D5FF));
+        }));
+
+        HandledScreens.register(HologramScreenHandler.TYPE, HologramScreen::new);
+    }
+
+    public static String getHologramFile() {
+        return hologramFile;
+    }
+
+    public static void setHologramFile(String hologramFile) {
+        HoloframesClient.hologramFile = hologramFile;
     }
 }

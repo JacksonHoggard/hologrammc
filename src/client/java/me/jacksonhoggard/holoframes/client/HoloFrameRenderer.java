@@ -10,7 +10,7 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.textures.TextureFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import me.jacksonhoggard.holoframes.Holoframes;
-import me.jacksonhoggard.holoframes.network.HoloFrameModelDataRequestPacket;
+import me.jacksonhoggard.holoframes.network.packet.HoloFrameModelDataRequestPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -118,7 +118,7 @@ public class HoloFrameRenderer {
     public static void renderHologram(ItemFrameEntityRenderState frameEntityRenderState, String holoFile, MatrixStack matrices) {
         HologramModel model = LOADED_MODELS.get(holoFile);
         if (model == null) {
-            ClientPlayNetworking.send(new HoloFrameModelDataRequestPacket.HoloFrameModelDataRequestPayload(holoFile));
+            ClientPlayNetworking.send(new HoloFrameModelDataRequestPacket(holoFile).toPayload());
             return;
         }
 

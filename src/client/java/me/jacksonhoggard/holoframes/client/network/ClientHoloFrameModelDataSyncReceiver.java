@@ -1,9 +1,8 @@
 package me.jacksonhoggard.holoframes.client.network;
 
 import me.jacksonhoggard.holoframes.client.HoloFrameRenderer;
-import me.jacksonhoggard.holoframes.network.HoloFrameModelDataSyncPacket;
+import me.jacksonhoggard.holoframes.network.packet.HoloFrameModelDataSyncPacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.ByteBuffer;
 

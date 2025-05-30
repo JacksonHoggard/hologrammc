@@ -1,6 +1,8 @@
 package me.jacksonhoggard.holoframes.network;
 
 import me.jacksonhoggard.holoframes.HologramModelRegistry;
+import me.jacksonhoggard.holoframes.network.packet.HoloFrameModelDataRequestPacket;
+import me.jacksonhoggard.holoframes.network.packet.HoloFrameModelDataSyncPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
 
