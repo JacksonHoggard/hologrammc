@@ -47,6 +47,7 @@ public class HoloFrameRenderer {
                         .getClassLoader()
                         .getResourceAsStream("assets/" + Holoframes.MOD_ID + "/textures/hologram_error.png")
         );
+        defaultModel.normalize();
         return defaultModel;
     }
 
@@ -71,8 +72,6 @@ public class HoloFrameRenderer {
                                 .build(false)
                 );
 
-    private static float totalTickDelta = 0;
-
     private static final Map<String, HologramModel> LOADED_MODELS = new HashMap<>();
 
     private static class HologramModel {
@@ -82,6 +81,34 @@ public class HoloFrameRenderer {
 
         HologramModel(float[] points) {
             this.points = points;
+        }
+
+        void normalize() {
+            // Calculate centroid
+            float sumX = 0, sumY = 0, sumZ = 0;
+            int numPoints = this.points.length / 3;
+            for (int i = 0; i < this.points.length; i += 3) {
+                sumX += this.points[i];
+                sumY += this.points[i + 1];
+                sumZ += this.points[i + 2];
+            }
+            float centroidX = sumX / numPoints;
+            float centroidY = sumY / numPoints;
+            float centroidZ = sumZ / numPoints;
+
+            // Find min and max for normalization
+            float minCoord = Float.MAX_VALUE;
+            float maxCoord = -Float.MAX_VALUE;
+            for (float point : this.points) {
+                if (point < minCoord) minCoord = point;
+                if (point > maxCoord) maxCoord = point;
+            }
+            float range = maxCoord - minCoord;
+            for (int i = 0, j = 0; i < this.points.length; i += 3, j += 2) {
+                this.points[i] = (this.points[i] - centroidX) / (range != 0 ? range : 1);
+                this.points[i + 1] = (this.points[i + 1] - centroidY) / (range != 0 ? range : 1);
+                this.points[i + 2] = (this.points[i + 2] - centroidZ) / (range != 0 ? range : 1);
+            }
         }
     }
 
@@ -174,12 +201,13 @@ public class HoloFrameRenderer {
 
     public static void addHologramModel(float[] points, float[] texCoords, String holoFile, byte[] texture) {
         HologramModel model = new HologramModel(points);
+        model.normalize();
         model.texture = texture != null && texture.length != 0 ? new HologramTexture(holoFile, texture) : null;
-        model.texCoords = texCoords;
+        model.texCoords = texture != null && texture.length != 0 ? texCoords : new float[points.length * 2];
         LOADED_MODELS.put(holoFile, model);
     }
 
-    public static void renderHologram(ItemFrameEntityRenderState frameEntityRenderState, String holoFile, MatrixStack matrices) {
+    public static void renderHologram(ItemFrameEntityRenderState frameEntityRenderState, String holoFile, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider) {
         HologramModel model = LOADED_MODELS.get(holoFile);
         if (model == null) {
             LOADED_MODELS.put(holoFile, DEFAULT_MODEL);
@@ -187,57 +215,27 @@ public class HoloFrameRenderer {
             return;
         }
 
-        Tessellator tessellator = Tessellator.getInstance();
-
-        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
         matrices.push();
         orientToFrame(frameEntityRenderState, matrices);
         rotateHologram(frameEntityRenderState, matrices);
-        totalTickDelta += MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks();
-        float rotation = (totalTickDelta / 50.0f % 360);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((MinecraftClient.getInstance().world.getTime() + MinecraftClient.getInstance().getRenderTickCounter().getDynamicDeltaTicks()) * 4));
         Matrix4f modifiedMatrix = matrices.peek().getPositionMatrix();
-
-        // Calculate centroid
-        float sumX = 0, sumY = 0, sumZ = 0;
-        int numPoints = model.points.length / 3;
-        for (int i = 0; i < model.points.length; i += 3) {
-            sumX += model.points[i];
-            sumY += model.points[i + 1];
-            sumZ += model.points[i + 2];
-        }
-        float centroidX = sumX / numPoints;
-        float centroidY = sumY / numPoints;
-        float centroidZ = sumZ / numPoints;
-
-        // Find min and max for normalization
-        float minCoord = Float.MAX_VALUE;
-        float maxCoord = -Float.MAX_VALUE;
-        for (float point : model.points) {
-            if (point < minCoord) minCoord = point;
-            if (point > maxCoord) maxCoord = point;
-        }
-        float range = maxCoord - minCoord;
 
         Vector3f color = model.texture != null ?
                 new Vector3f(1.0F, 1.0F, 1.0F) :
                 new Vector3f(0.3333333333333333F, 1.0F, 1.0F);
 
+        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(HOLOGRAM_LAYER);
+
         for (int i = 0, j = 0; i < model.points.length; i += 3, j += 2) {
-            float x = (model.points[i] - centroidX) / (range != 0 ? range : 1);
-            float y = (model.points[i + 1] - centroidY) / (range != 0 ? range : 1);
-            float z = (model.points[i + 2] - centroidZ) / (range != 0 ? range : 1);
-            buffer.vertex(modifiedMatrix, x, y, z)
+            vertexConsumer.vertex(modifiedMatrix, model.points[i], model.points[i + 1], model.points[i + 2])
                     .texture(model.texCoords[j], 1.0F - model.texCoords[j + 1])
                     .color(color.x, color.y, color.z, 0.5F);
         }
 
         matrices.pop();
 
-        BuiltBuffer builtBuffer = buffer.end();
-
         RenderSystem.setShaderTexture(0, model.texture != null ? model.texture.texture : null);
-        HOLOGRAM_LAYER.draw(builtBuffer);
     }
 
     private static void orientToFrame(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {
