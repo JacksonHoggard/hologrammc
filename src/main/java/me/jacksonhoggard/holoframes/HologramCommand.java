@@ -23,7 +23,7 @@ public class HologramCommand {
         EntityHitResult frame = getPlayerPOVHitResult(player, 25.0D);
         if(frame != null && frame.getEntity().getType().equals(EntityType.ITEM_FRAME)) {
             ((ItemFrameEntityMixinAccess) (Object) frame.getEntity()).holoFrames$setModelFile(fileName);
-            context.getSource().sendFeedback(() -> Text.literal("Assigned hologram file: " + fileName), true);
+            context.getSource().sendFeedback(() -> Text.literal("Assigned hologram file: " + fileName), false);
         } else {
             context.getSource().sendError(Text.literal("You must be looking at an item frame!"));
         }

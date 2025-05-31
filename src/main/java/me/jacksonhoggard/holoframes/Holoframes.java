@@ -8,6 +8,8 @@ import me.jacksonhoggard.holoframes.network.packet.HoloFrameScreenCloseRequestPa
 import me.jacksonhoggard.holoframes.network.packet.HologramScreenDataSyncPacket;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.loader.impl.util.log.Log;
+import net.fabricmc.loader.impl.util.log.LogCategory;
 import net.minecraft.server.command.CommandManager;
 
 public class Holoframes implements ModInitializer {
@@ -15,10 +17,12 @@ public class Holoframes implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        Log.info(LogCategory.LOG, "Initializing Holoframes");
         CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
             commandDispatcher.register(CommandManager.literal("holoframes")
+                    .requires((player) -> player.hasPermissionLevel(2))
                     .then(CommandManager.argument("file", HologramCommand.FILE_ARGUMENT)
-                            .executes(commandContext -> HologramCommand.executeSetHologram(commandContext))
+                            .executes(HologramCommand::executeSetHologram)
                     )
             );
         }));
