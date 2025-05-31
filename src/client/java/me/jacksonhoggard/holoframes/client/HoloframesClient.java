@@ -1,10 +1,10 @@
 package me.jacksonhoggard.holoframes.client;
 
 import me.jacksonhoggard.holoframes.HoloframesComponents;
+import me.jacksonhoggard.holoframes.HoloframesTypes;
 import me.jacksonhoggard.holoframes.client.network.ClientHoloFrameModelDataSyncReceiver;
 import me.jacksonhoggard.holoframes.item.HoloframesItems;
 import me.jacksonhoggard.holoframes.screen.HologramScreen;
-import me.jacksonhoggard.holoframes.screen.HologramScreenHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -24,6 +24,6 @@ public class HoloframesClient implements ClientModInitializer {
             list.add(itemStack.get(HoloframesComponents.SELECTED_HOLOGRAM_FILE).copy().formatted(Formatting.GOLD));
         }));
 
-        HandledScreens.register(HologramScreenHandler.TYPE, HologramScreen::new);
+        HandledScreens.register(HoloframesTypes.HOLOGRAM_SCREEN_HANDLER_TYPE, HologramScreen::new);
     }
 }

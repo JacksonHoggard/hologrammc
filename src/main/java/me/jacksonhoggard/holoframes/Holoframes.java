@@ -38,5 +38,6 @@ public class Holoframes implements ModInitializer {
         // Register items
         HoloframesComponents.initialize();
         HoloframesItems.initialize();
+        HoloframesTypes.initialize();
     }
 }
