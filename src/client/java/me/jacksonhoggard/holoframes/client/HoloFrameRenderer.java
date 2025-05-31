@@ -25,6 +25,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.io.InputStream;
 import java.util.*;
@@ -197,6 +198,19 @@ public class HoloFrameRenderer {
         matrices.multiply(RotationAxis.POSITIVE_Y.rotation(rotation));
         Matrix4f modifiedMatrix = matrices.peek().getPositionMatrix();
 
+        // Calculate centroid
+        float sumX = 0, sumY = 0, sumZ = 0;
+        int numPoints = model.points.length / 3;
+        for (int i = 0; i < model.points.length; i += 3) {
+            sumX += model.points[i];
+            sumY += model.points[i + 1];
+            sumZ += model.points[i + 2];
+        }
+        float centroidX = sumX / numPoints;
+        float centroidY = sumY / numPoints;
+        float centroidZ = sumZ / numPoints;
+
+        // Find min and max for normalization
         float minCoord = Float.MAX_VALUE;
         float maxCoord = -Float.MAX_VALUE;
         for (float point : model.points) {
@@ -205,16 +219,17 @@ public class HoloFrameRenderer {
         }
         float range = maxCoord - minCoord;
 
+        Vector3f color = model.texture != null ?
+                new Vector3f(1.0F, 1.0F, 1.0F) :
+                new Vector3f(0.3333333333333333F, 1.0F, 1.0F);
+
         for (int i = 0, j = 0; i < model.points.length; i += 3, j += 2) {
-            float x = (model.points[i] - minCoord) / (range != 0 ? range : 1);
-            float y = (model.points[i + 1] - minCoord) / (range != 0 ? range : 1);
-            float z = (model.points[i + 2] - minCoord) / (range != 0 ? range : 1);
-            float xNormalized = (x - 0.5f);
-            float yNormalized = (y - 0.5f);
-            float zNormalized = (z - 0.5f);
-            buffer.vertex(modifiedMatrix, xNormalized, yNormalized, zNormalized)
+            float x = (model.points[i] - centroidX) / (range != 0 ? range : 1);
+            float y = (model.points[i + 1] - centroidY) / (range != 0 ? range : 1);
+            float z = (model.points[i + 2] - centroidZ) / (range != 0 ? range : 1);
+            buffer.vertex(modifiedMatrix, x, y, z)
                     .texture(model.texCoords[j], 1.0F - model.texCoords[j + 1])
-                    .color(1.0F, 1.0F, 1.0F, 0.5F);
+                    .color(color.x, color.y, color.z, 0.5F);
         }
 
         matrices.pop();
@@ -228,7 +243,7 @@ public class HoloFrameRenderer {
     private static void orientToFrame(ItemFrameEntityRenderState itemFrameEntityRenderState, MatrixStack matrixStack) {
         Direction direction = itemFrameEntityRenderState.facing;
         matrixStack.scale(0.5F, 0.5F, 0.5F);
-        matrixStack.translate(0.0F, 0.25F, 0.0F);
+        matrixStack.translate(0.0F, 0.5F, 0.0F);
         float f = 0.0F;
         float g = 0.0F;
         if (direction.getAxis().isHorizontal()) {
