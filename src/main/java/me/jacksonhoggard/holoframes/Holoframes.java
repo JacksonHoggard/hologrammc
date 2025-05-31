@@ -32,6 +32,7 @@ public class Holoframes implements ModInitializer {
         ServerHoloFrameScreenCloseRequestHandler.register();
 
         // Register items
+        HoloframesComponents.initialize();
         HoloframesItems.initialize();
     }
 }

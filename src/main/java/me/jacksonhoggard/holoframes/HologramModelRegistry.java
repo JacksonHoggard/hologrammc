@@ -28,26 +28,28 @@ public class HologramModelRegistry {
                                 ObjLoader.ObjModel model = ObjLoader.load(path.toString());
                                 float[] vertices = model.getVerticesInFaceOrder();
                                 float[] texCoords = model.getTexCoordsInFaceOrder();
-                                byte[] texture = convertImageToByteArray(
+                                byte[] texture = null;
+                                if(model.textureFileName != null)
+                                    texture = convertImageToByteArray(
                                         FabricLoader.getInstance().getConfigDir()
                                                 .resolve("holoframes")
                                                 .resolve("models")
-                                                .resolve("textures")
-                                                .resolve(path.getFileName().toString().replace(".obj", ".png"))
-                                                .toString()
-                                );
+                                                .resolve(model.textureFileName)
+                                                .toString());
                                 if(texture == null) {
-                                    Log.warn(LogCategory.KNOT, "Texture for model " + path.getFileName() + " not found.");
+                                    if(model.textureFileName != null)
+                                        Log.error(LogCategory.LOG, "Texture for model " + path.getFileName() + " not found.");
                                     texture = new byte[0];
                                 }
                                 models.put(path.getFileName().toString(), new HologramModel(vertices, texCoords, texture));
+                                Log.info(LogCategory.LOG, "Loaded hologram model: " + path.getFileName(), Holoframes.MOD_ID);
                             } catch (Exception e) {
-                                Log.error(LogCategory.KNOT, "Failed to load hologram model from " + path, e);
+                                Log.error(LogCategory.LOG, "Failed to load hologram model from " + path, e);
                             }
                         });
             }
         } catch (Exception e) {
-            Log.error(LogCategory.KNOT, "Failed to load hologram models", e);
+            Log.error(LogCategory.LOG, "Failed to load hologram models", e);
         }
     }
 
@@ -63,7 +65,7 @@ public class HologramModelRegistry {
             ImageIO.write(bufferedImage, fileExtension, outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
-            Log.error(LogCategory.KNOT, "Failed to convert image to byte array", e);
+            Log.error(LogCategory.LOG, "Failed to convert image to byte array", e);
             return null;
         }
     }

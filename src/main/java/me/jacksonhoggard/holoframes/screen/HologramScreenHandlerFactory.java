@@ -19,7 +19,7 @@ public class HologramScreenHandlerFactory implements ExtendedScreenHandlerFactor
 
     @Override
     public Text getDisplayName() {
-        return Text.translatable("item.holoframes.hologram_model_item.title");
+        return Text.translatable("screen.holoframes.hologram_screen.title");
     }
 
     @Override

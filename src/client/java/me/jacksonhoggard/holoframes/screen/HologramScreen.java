@@ -1,11 +1,12 @@
 package me.jacksonhoggard.holoframes.screen;
 
-import me.jacksonhoggard.holoframes.client.HoloframesClient;
 import me.jacksonhoggard.holoframes.network.packet.HoloFrameScreenCloseRequestPacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.Text;
 
@@ -23,16 +24,35 @@ public class HologramScreen extends HandledScreen<HologramScreenHandler> {
         this.hologramFiles = handler.getHologramFiles();
     }
 
+    private static class HologramScreenTitle extends TextWidget {
+        public HologramScreenTitle(Text message, TextRenderer textRenderer) {
+            super(message, textRenderer);
+        }
+
+        @Override
+        public int getWidth() {
+            return 200;
+        }
+
+        @Override
+        public int getHeight() {
+            return 20;
+        }
+    }
+
     @Override
     protected void init() {
         super.init();
+        int titlePos = 20;
+        int buttonGroupPos = 40;
+        this.HOLOGRAM_SELECT_WIDGETS.clear();
         for(String hologramFile : hologramFiles) {
             ButtonWidget buttonWidget = ButtonWidget.builder(
                     Text.literal(hologramFile),
                             HologramScreen::onButtonClick)
                     .dimensions(
-                            (width / 2) - 100,
-                            this.y + 20 + this.HOLOGRAM_SELECT_WIDGETS.size() * 20,
+                            (this.width / 2) - 100,
+                            buttonGroupPos + this.HOLOGRAM_SELECT_WIDGETS.size() * 20,
                             200,
                             20
                     )
@@ -40,6 +60,9 @@ public class HologramScreen extends HandledScreen<HologramScreenHandler> {
             this.HOLOGRAM_SELECT_WIDGETS.add(buttonWidget);
             this.addDrawableChild(buttonWidget);
         }
+        HologramScreenTitle titleWidget = new HologramScreenTitle(this.title, this.textRenderer);
+        titleWidget.setPosition(width / 2 - titleWidget.getWidth() / 2, titlePos);
+        this.addDrawableChild(titleWidget);
     }
 
     @Override
@@ -60,14 +83,12 @@ public class HologramScreen extends HandledScreen<HologramScreenHandler> {
     }
 
     private static void onButtonClick(ButtonWidget button) {
-        String file = button.getMessage().getString();
-        HoloframesClient.setHologramFile(file);
-        ClientPlayNetworking.send(new HoloFrameScreenCloseRequestPacket().toPayload());
+        ClientPlayNetworking.send(new HoloFrameScreenCloseRequestPacket(button.getMessage().getString()).toPayload());
     }
 
     @Override
     public void close() {
-        HOLOGRAM_SELECT_WIDGETS.clear();
+        this.HOLOGRAM_SELECT_WIDGETS.clear();
         super.close();
     }
 }
