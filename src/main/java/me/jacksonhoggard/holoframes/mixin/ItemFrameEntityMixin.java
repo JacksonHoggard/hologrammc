@@ -62,7 +62,7 @@ public abstract class ItemFrameEntityMixin implements ItemFrameEntityMixinAccess
     @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
     private void onInteract(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         if(!this.holoFrames$getModelFile().isEmpty()) {
-            if(player.getWorld().isClient) {
+            if(!player.getWorld().isClient) {
                 this.holoFrames$setHologramRotation(this.holoFrames$getHologramRotation() + 1);
                 ((ItemFrameEntity) (Object) this).emitGameEvent(GameEvent.BLOCK_CHANGE, player);
             }
