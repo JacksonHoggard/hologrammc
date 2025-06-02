@@ -8,6 +8,10 @@ A Minecraft Fabric mod that allows you to display custom 3D hologram models in i
 - In-game GUI for selecting hologram models
 - Server-client synchronization of model data
 
+## Screenshots
+![HoloFrames Demo](https://raw.githubusercontent.com/JacksonHoggard/hologrammc/demo/demo.png)
+![HoloFrames Demo 1](https://raw.githubusercontent.com/JacksonHoggard/hologrammc/demo/demo_1.png)
+
 ## Getting Started
 
 ### Requirements
