@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "XXX",
+        "XWX",
+        "XXX"
+    ],
+  "key": {
+    "X": "minecraft:glass",
+    "W": "minecraft:lapis_lazuli"
+  },
+  "result": {
+    "id": "holoframes:hologram_model_item",
+    "count": 1
+  }
+}
