@@ -3,8 +3,8 @@ package me.jacksonhoggard.holoframes.mixin;
 import me.jacksonhoggard.holoframes.HoloframesComponents;
 import me.jacksonhoggard.holoframes.ItemFrameEntityMixinAccess;
 import me.jacksonhoggard.holoframes.item.HoloframesItems;
-import me.jacksonhoggard.holoframes.item.HologramModelItem;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -13,7 +13,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -56,6 +55,16 @@ public abstract class ItemFrameEntityMixin implements ItemFrameEntityMixinAccess
         }
         if (nbt.contains("HologramRotation")) {
             this.holoFrames$setHologramRotation(nbt.getInt("HologramRotation", 0));
+        }
+    }
+
+    @Inject(method = "damage", at = @At("HEAD"))
+    private void onDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if(!this.holoFrames$getModelFile().isEmpty() && source.getAttacker() instanceof PlayerEntity player) {
+            ItemStack stack = new ItemStack(HoloframesItems.HOLOGRAM_MODEL_ITEM);
+            stack.set(HoloframesComponents.SELECTED_HOLOGRAM_FILE, Text.of(this.holoFrames$getModelFile()));
+            this.setHeldItemStack(stack);
+            this.holoFrames$setModelFile("");
         }
     }
 

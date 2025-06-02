@@ -1,6 +1,6 @@
 {
   "item.holoframes.hologram_model_item": "Hologram",
   "item.holoframes.hologram_model_item.tooltip": "Place in an item frame to display a hologram",
-  "item.holoframes.hologram_model_item.no_file": "No file selected",
+  "item.holoframes.hologram_model_item.no_file": "No hologram selected",
   "screen.holoframes.hologram_screen.title": "Select Hologram Model"
 }

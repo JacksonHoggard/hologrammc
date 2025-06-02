@@ -4,8 +4,14 @@
   "version": "${version}",
   "name": "HoloFrames",
   "description": "",
-  "authors": [],
-  "contact": {},
+  "authors": [
+    "Jack Hoggard"
+  ],
+  "contact": {
+    "email": "jhoggard0129@gmail.com",
+    "sources": "https://github.com/JacksonHoggard/hologrammc",
+    "issues": "https://github.com/JacksonHoggard/hologrammc/issues"
+  },
   "license": "All-Rights-Reserved",
   "icon": "assets/holoframes/icon.png",
   "environment": "*",
