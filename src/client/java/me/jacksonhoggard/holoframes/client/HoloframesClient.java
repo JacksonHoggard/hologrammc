@@ -11,8 +11,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.Objects;
-
 public class HoloframesClient implements ClientModInitializer {
 
     @Override
