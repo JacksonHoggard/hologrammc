@@ -11,6 +11,8 @@ import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Objects;
+
 public class HoloframesClient implements ClientModInitializer {
 
     @Override
@@ -21,7 +23,9 @@ public class HoloframesClient implements ClientModInitializer {
             if(!itemStack.isOf(HoloframesItems.HOLOGRAM_MODEL_ITEM))
                 return;
             list.add(Text.translatable("item.holoframes.hologram_model_item.tooltip").formatted(Formatting.AQUA));
-            list.add(itemStack.get(HoloframesComponents.SELECTED_HOLOGRAM_FILE).copy().formatted(Formatting.GOLD));
+            Text selectedFile = itemStack.getOrDefault(HoloframesComponents.SELECTED_HOLOGRAM_FILE, Text.of(""));
+            if(!selectedFile.getString().isEmpty())
+                list.add(selectedFile.copy().formatted(Formatting.GOLD));
         }));
 
         HandledScreens.register(HoloframesTypes.HOLOGRAM_SCREEN_HANDLER_TYPE, HologramScreen::new);

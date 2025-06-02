@@ -18,14 +18,12 @@ public class Holoframes implements ModInitializer {
     @Override
     public void onInitialize() {
         Log.info(LogCategory.LOG, "Initializing Holoframes");
-        CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
-            commandDispatcher.register(CommandManager.literal("holoframes")
-                    .requires((player) -> player.hasPermissionLevel(2))
-                    .then(CommandManager.argument("file", HologramCommand.FILE_ARGUMENT)
-                            .executes(HologramCommand::executeSetHologram)
-                    )
-            );
-        }));
+        CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> commandDispatcher.register(CommandManager.literal("holoframes")
+                .requires((player) -> player.hasPermissionLevel(2))
+                .then(CommandManager.argument("file", HologramCommand.FILE_ARGUMENT)
+                        .executes(HologramCommand::executeSetHologram)
+                )
+        )));
         // Register network packets
         HoloFrameModelDataSyncPacket.register();
         HoloFrameModelDataRequestPacket.register();

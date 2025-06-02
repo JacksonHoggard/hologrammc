@@ -9,12 +9,12 @@ import net.minecraft.screen.ScreenHandler;
 public class HologramScreenHandler extends ScreenHandler {
     private final String[] hologramFiles;
 
-    public HologramScreenHandler(int syncId, PlayerInventory playerInventory, String hologramFiles) {
+    public HologramScreenHandler(int syncId, PlayerInventory ignoredPlayerInventory, String hologramFiles) {
         super(HoloframesTypes.HOLOGRAM_SCREEN_HANDLER_TYPE, syncId);
         this.hologramFiles = hologramFiles.split(",");
     }
 
-    public HologramScreenHandler(int syncId, PlayerInventory playerInventory) {
+    public HologramScreenHandler(int syncId, PlayerInventory ignoredPlayerInventory) {
         super(HoloframesTypes.HOLOGRAM_SCREEN_HANDLER_TYPE, syncId);
         this.hologramFiles = new String[0];
     }

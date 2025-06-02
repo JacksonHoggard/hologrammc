@@ -60,7 +60,7 @@ public abstract class ItemFrameEntityMixin implements ItemFrameEntityMixinAccess
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if(!this.holoFrames$getModelFile().isEmpty() && source.getAttacker() instanceof PlayerEntity player) {
+        if(!this.holoFrames$getModelFile().isEmpty()) {
             ItemStack stack = new ItemStack(HoloframesItems.HOLOGRAM_MODEL_ITEM);
             stack.set(HoloframesComponents.SELECTED_HOLOGRAM_FILE, Text.of(this.holoFrames$getModelFile()));
             this.setHeldItemStack(stack);
